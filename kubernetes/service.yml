@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: argo
+  name: argo-webhook
+spec:
+  ports:
+  - name: webhook
+    port: 3000
+  selector:
+    app: argo-webhook

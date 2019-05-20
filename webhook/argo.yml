@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  namespace: argo
+  generateName: start-workflow-
+spec:
+  serviceAccountName: argo
+  entrypoint: start-workflow
+  arguments:
+    parameters:
+    - name: repo
+      value: <git_repo>
+    - name: revision
+      value: <git_revision>
+  templates:
+  - name: start-workflow
+    inputs:
+      artifacts:
+      - name: git-repo
+        path: /src
+        git:
+          repo: "{{workflow.parameters.repo}}"
+          revision: "{{workflow.parameters.revision}}"
+          sshPrivateKeySecret:
+            name: bitbucket-creds
+            key: id_rsa
+    container:
+      resources: 
+        requests:
+          cpu: 50m
+          memory: 50Mi
+        limits: 
+          cpu: 200m
+          memory: 200Mi
+      image: bouwe/ansible-kubectl-credstash:0.0.1
+      command: [sh, -c]
+      args: ["kubectl apply -f src/argo.yml"]
+ 
+  

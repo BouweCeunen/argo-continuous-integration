@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: argo
+  name: argo-webhook
+  labels:
+    app: argo-webhook
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: argo-webhook
+  template:
+    metadata:
+      labels:
+        app: argo-webhook
+    spec:
+      containers:
+      - name: argo-webhook
+        image: bouwe/argo-continuous-integration:0.0.1
+        resources:
+          limits:
+            cpu: 250m
+            memory: 250Mi
+          requests:
+            cpu: 50m
+            memory: 50Mi
