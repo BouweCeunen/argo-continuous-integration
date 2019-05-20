@@ -2,14 +2,15 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   namespace: argo
-  generateName: start-workflow-
+  generateName: start-workflow-<git_repo_name>-
+  name: start-workflow-<git_repo_name>-<timestamp>
 spec:
   serviceAccountName: argo
   entrypoint: start-workflow
   arguments:
     parameters:
     - name: repo
-      value: <git_repo>
+      value: <git_repo_full>
     - name: revision
       value: <git_revision>
   templates:

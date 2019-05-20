@@ -15,13 +15,14 @@ spec:
       labels:
         app: argo-webhook
     spec:
+      serviceAccountName: argo
       containers:
       - name: argo-webhook
-        image: bouwe/argo-continuous-integration:0.0.1
+        image: bouwe/argo-continuous-integration:0.0.9
         resources:
           limits:
-            cpu: 250m
-            memory: 250Mi
+            cpu: 100m
+            memory: 100Mi
           requests:
-            cpu: 50m
-            memory: 50Mi
+            cpu: 20m
+            memory: 20Mi

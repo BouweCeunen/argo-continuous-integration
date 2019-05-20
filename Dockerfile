@@ -9,7 +9,10 @@ RUN GOPATH=/webhook
 RUN cd /webhook && go build -o /bin/webhook
 
 # final image
-FROM gcr.io/distroless/base
+FROM lachlanevenson/k8s-kubectl
 MAINTAINER Bouwe Ceunen <bouweceunen@gmail.com>
-COPY --from=builder /bin/webhook /
-CMD ["/webhook"]
+WORKDIR /hook
+COPY --from=builder /bin/webhook /hook/webhook
+COPY --from=builder /webhook/argo.yml /hook/argo.yml
+ENTRYPOINT [ "" ]
+CMD ["/hook/webhook"]

@@ -7,6 +7,7 @@ metadata:
     ingress.kubernetes.io/ssl-redirect: 'true'
     certbot.kubernetes.secrets.aws/elb-dns-name: a4d9acea544d511e9aef50ae120ed3e3-483026455.us-east-1.elb.amazonaws.com
     certbot.kubernetes.secrets.aws/elb-region: us-east-1
+    ingress.kubernetes.io/rewrite-target: /
 spec:
   rules:
   - host: argo.k8s.bouweceunen.com
