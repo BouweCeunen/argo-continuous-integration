@@ -36,11 +36,10 @@ func main() {
         input, _ := ioutil.ReadFile("argo.yml")
         temp := bytes.Replace(input, []byte("<git_repo_name>"), []byte(git_repo_name), -1)
         temp2 := bytes.Replace(temp, []byte("<git_repo_full>"), []byte(full_git_repo), -1)
-        temp3 := bytes.Replace(temp2, []byte("<timestamp>"), []byte(timestamp), -1)
-        output := bytes.Replace(temp3, []byte("<git_revision>"), []byte(git_revision), -1)
+        output := bytes.Replace(temp2, []byte("<git_revision>"), []byte(git_revision), -1)
         ioutil.WriteFile(argo_filename, output, 0666)
 
-        command_output, err := exec.Command("sh", "-c", "kubectl apply -f " + argo_filename).CombinedOutput()
+        command_output, err := exec.Command("sh", "-c", "./argo submit " + argo_filename).CombinedOutput()
         if err != nil {
             fmt.Printf("Accepted webhook request, did NOT start Argo workflow: git_repo=%q,git_revision=%q, because of: %q\n", git_repo, git_revision, string(err.Error()))
         } else {

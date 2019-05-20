@@ -3,7 +3,6 @@ kind: Workflow
 metadata:
   namespace: argo
   generateName: start-workflow-<git_repo_name>-
-  name: start-workflow-<git_repo_name>-<timestamp>
 spec:
   serviceAccountName: argo
   entrypoint: start-workflow
@@ -33,8 +32,7 @@ spec:
         limits: 
           cpu: 200m
           memory: 200Mi
-      image: bouwe/ansible-kubectl-credstash:0.0.1
-      command: [sh, -c]
-      args: ["kubectl apply -f src/argo.yml"]
+      image: argoproj/argocli
+      args: ["submit", "src/argo.yml"]
  
   
