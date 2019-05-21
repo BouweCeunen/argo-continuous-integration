@@ -22,7 +22,7 @@ func main() {
         c.JSON(202, gin.H{})
 
         buf := new(bytes.Buffer)
-	    buf.ReadFrom(c.Request.Body)
+        buf.ReadFrom(c.Request.Body)
         
         git_repo,_ := jsonparser.GetString(buf.Bytes(), "repository", "full_name")
         git_revision,_ := jsonparser.GetString(buf.Bytes(), "push", "changes", "[0]", "new", "name")

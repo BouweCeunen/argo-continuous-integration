@@ -7,3 +7,6 @@ Continuous integration with Argo which supports bitbucket private webhooks.
 ```
 kubectl apply -f kubernetes/
 ```
+
+## Usage
+Once deployed, add a webhook to your bitbucket repositories ```https://<your-argo-domain>/webhook``` and change the url in the ingress before deploying.
