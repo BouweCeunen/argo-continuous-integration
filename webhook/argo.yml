@@ -30,8 +30,8 @@ spec:
           cpu: 100m
           memory: 100Mi
         limits: 
-          cpu: 200m
-          memory: 200Mi
+          cpu: 400m
+          memory: 400Mi
       image: argoproj/argocli
       args: ["submit", "src/argo.yml"]
  
