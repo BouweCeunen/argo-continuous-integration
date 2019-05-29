@@ -24,6 +24,9 @@ spec:
           sshPrivateKeySecret:
             name: bitbucket-creds
             key: id_rsa
+    metadata:
+      labels:
+        app: argo
     container:
       resources: 
         requests:

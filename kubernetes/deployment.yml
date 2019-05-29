@@ -18,7 +18,7 @@ spec:
       serviceAccountName: argo
       containers:
       - name: argo-webhook
-        image: bouwe/argo-continuous-integration:0.1.3
+        image: bouwe/argo-continuous-integration:0.1.4
         resources:
           limits:
             cpu: 100m
