@@ -5,7 +5,7 @@ metadata:
   namespace: argo
   annotations:
     ingress.kubernetes.io/ssl-redirect: 'true'
-    certbot.kubernetes.secrets.aws/elb-dns-name: ae501343b936711e989670a5adca4e2d-1999170429.us-east-1.elb.amazonaws.com
+    certbot.kubernetes.secrets.aws/elb-dns-name: ac631832ab44011e98a300afd8baa461-988247704.us-east-1.elb.amazonaws.com
     certbot.kubernetes.secrets.aws/elb-region: us-east-1
     ingress.kubernetes.io/rewrite-target: /
 spec:
