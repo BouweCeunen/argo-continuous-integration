@@ -30,11 +30,11 @@ spec:
     container:
       resources: 
         requests:
+          cpu: 50m
+          memory: 50Mi
+        limits: 
           cpu: 100m
           memory: 100Mi
-        limits: 
-          cpu: 400m
-          memory: 800Mi
       image: argoproj/argocli
       args: ["submit", "src/argo.yml"]
  
