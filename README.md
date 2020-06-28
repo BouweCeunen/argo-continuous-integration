@@ -4,6 +4,8 @@ Continuous integration with Argo which supports bitbucket private webhooks.
 [![DockerHub Badge](https://dockeri.co/image/bouwe/argo-continuous-integration)](https://hub.docker.com/r/bouwe/argo-continuous-integration)
 
 ## Installation
+Change your host in the `ingress.yml` file first. This file resides in the /kubernetes folder.
+
 ```
 kubectl apply -f kubernetes/
 ```
