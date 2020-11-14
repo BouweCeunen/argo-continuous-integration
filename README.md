@@ -1,5 +1,5 @@
 # Argo Continuous Integration
-Continuous integration that Argo which supports bitbucket private webhooks.
+Continuous integration with Argo that supports bitbucket private webhooks.
 
 [![DockerHub Badge](https://dockeri.co/image/bouwe/argo-continuous-integration)](https://hub.docker.com/r/bouwe/argo-continuous-integration)
 
