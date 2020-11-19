@@ -1,0 +1,196 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  namespace: argo
+  generateName: <<change_this_repo_name>>--
+spec:
+  serviceAccountName: argo
+  entrypoint: cicd
+  volumes:
+  - name: docker-config
+    secret: 
+      secretName: regcred
+  arguments:
+    parameters:
+    - name: repo
+      value: git@bitbucket.org:bouwe_ceunen/<<change_this_repo_name>>.git
+    - name: revision
+      value: master
+    - name: image-name
+      value: <<change_this_full_image_registry_name_without_tags>>
+  templates:
+  - name: cicd
+    steps:
+      - - name: checkout
+          template: checkout
+      - - name: build-push-docker
+          template: build-push-docker
+          arguments:
+            artifacts:
+            - name: git-repo
+              from: "{{steps.checkout.outputs.artifacts.source}}"
+            parameters:
+            - name: image-tag
+              value: "{{steps.checkout.outputs.parameters.tag}}"
+      - - name: run-tests
+          template: run-tests
+          arguments:
+            artifacts:
+            - name: git-repo
+              from: "{{steps.checkout.outputs.artifacts.source}}"
+            parameters:
+            - name: image-tag
+              value: "{{steps.checkout.outputs.parameters.tag}}"
+      - - name: deploy-kubernetes
+          template: deploy-kubernetes
+          arguments:
+            artifacts:
+            - name: git-repo
+              from: "{{steps.checkout.outputs.artifacts.source}}"
+            parameters:
+            - name: image-tag
+              value: "{{steps.checkout.outputs.parameters.tag}}"
+  - name: checkout
+    tolerations:
+    - key: node-role.kubernetes.io/master
+      operator: Exists
+      effect: NoSchedule
+    inputs:
+      artifacts:
+      - name: git-repo
+        path: /src
+        git:
+          repo: "{{workflow.parameters.repo}}"
+          revision: "{{workflow.parameters.revision}}"
+          sshPrivateKeySecret:
+            name: bitbucket-creds
+            key: id_rsa
+    metadata:
+      labels:
+        app: argo
+    container:
+      image: alpine/git
+      resources: 
+        requests:
+          cpu: 100m
+          memory: 100Mi
+        limits: 
+          cpu: 400m
+          memory: 800Mi
+      command: [sh, -c]
+      args: ["cd /src && git rev-parse --short HEAD > /tmp/git-commit"]
+    outputs:
+      artifacts:
+      - name: source
+        path: /src
+      parameters:
+      - name: tag
+        valueFrom:
+          path: /tmp/git-commit
+  - name: build-push-docker
+    tolerations:
+    - key: node-role.kubernetes.io/master
+      operator: Exists
+      effect: NoSchedule
+    inputs:
+      artifacts:
+      - name: git-repo
+        path: /src
+      parameters:
+      - name: image-tag
+    metadata:
+      labels:
+        app: argo
+    container:
+      image: docker:17.10
+      resources: 
+        requests:
+          cpu: 100m
+          memory: 100Mi
+        limits: 
+          cpu: 400m
+          memory: 800Mi
+      workingDir: /src
+      command: [sh, -c]
+      args: ["until docker ps; do sleep 1; done; cd /src \ 
+        && docker build . -t {{workflow.parameters.image-name}}:{{inputs.parameters.image-tag}} \
+        && docker push {{workflow.parameters.image-name}}:{{inputs.parameters.image-tag}} \
+        && docker tag {{workflow.parameters.image-name}}:{{inputs.parameters.image-tag}} {{workflow.parameters.image-name}}:latest \
+        && docker push {{workflow.parameters.image-name}}:latest \
+        && cd test; docker build . -t {{workflow.parameters.image-name}}-cypress:{{inputs.parameters.image-tag}} \
+        && docker push {{workflow.parameters.image-name}}-cypress:{{inputs.parameters.image-tag}} \
+        && docker tag {{workflow.parameters.image-name}}-cypress:{{inputs.parameters.image-tag}} {{workflow.parameters.image-name}}-cypress:latest \
+        && docker push {{workflow.parameters.image-name}}-cypress:latest"]
+      env:
+      - name: DOCKER_HOST
+        value: 127.0.0.1
+      volumeMounts:
+      - name: docker-config
+        mountPath: /root/.docker/config.json
+        subPath: .dockerconfigjson
+    sidecars:
+    - name: docker-in-docker
+      image: docker:17.10-dind
+      resources: 
+        requests:
+          cpu: 100m
+          memory: 100Mi
+        limits: 
+          cpu: 400m
+          memory: 800Mi
+      securityContext:
+        privileged: true
+      mirrorVolumeMounts: true
+  - name: run-tests
+    tolerations:
+    - key: node-role.kubernetes.io/master
+      operator: Exists
+      effect: NoSchedule
+    inputs:
+      artifacts:
+      - name: git-repo
+        path: /src
+      parameters:
+      - name: image-tag
+    metadata:
+      labels:
+        app: argo
+    container:
+      image: bouwe/ansible-kubectl-credstash:0.0.1
+      resources: 
+        requests:
+          cpu: 100m
+          memory: 100Mi
+        limits: 
+          cpu: 400m
+          memory: 800Mi
+      workingDir: /src
+      command: [sh, -c]
+      args: ["cd /src/ansible \
+          && ansible-playbook run-frontend-test-on-k8s.yml -i environments/frontend-test/frontend-k8s -e docker_image_tag={{inputs.parameters.image-tag}}"]
+  - name: deploy-kubernetes
+    tolerations:
+    - key: node-role.kubernetes.io/master
+      operator: Exists
+      effect: NoSchedule
+    inputs:
+      artifacts:
+      - name: git-repo
+        path: /src
+      parameters:
+      - name: image-tag
+    metadata:
+      labels:
+        app: argo
+    container: 
+      image: bouwe/ansible-kubectl-credstash:0.0.1
+      resources: 
+        requests:
+          cpu: 100m
+          memory: 100Mi
+        limits: 
+          cpu: 400m
+          memory: 800Mi
+      workingDir: /src
+      command: [sh, -c]
+      args: ["cd /src/ansible && ansible-playbook deploy-to-k8s.yml -i environments/frontend/frontend-k8s -e docker_image_tag={{inputs.parameters.image-tag}}"]
