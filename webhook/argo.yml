@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   namespace: argo
-  generateName: start-workflow-<git_repo_name>
+  generateName: start-workflow-<git_repo_name>-
 spec:
   serviceAccountName: argo
   entrypoint: start-workflow
